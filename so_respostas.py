@@ -15,7 +15,7 @@ def create_respostas(archive):
 
     '''
     ## given file, opening to read it
-    txt = '/Users/t316775/Downloads/'+archive
+    txt = '/Users/t316775/Downloads/Questões - Ponto/Quest+Áes - Ponto/CESPE/'+archive
     fp = open (txt, 'r')
 
     ## creating temp file
@@ -23,7 +23,7 @@ def create_respostas(archive):
     temp = open (temp_file, 'w')
     
     ## creating file to write into
-    novo_arquivo = '/Users/t316775/Downloads/'+ "respostas_"+archive
+    novo_arquivo = '/Users/t316775/Downloads/Questões - Ponto/Quest+Áes - Ponto/CESPE/'+ archive + "_respostas"
     final = open(novo_arquivo, "w")
 
     ## Counter for the questions and pages read

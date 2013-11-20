@@ -25,8 +25,8 @@ def scrap_pdf(path):
 
 if __name__ == "__main__":
 
-    path = "/Users/t316775/Downloads/Drt_Adm_Cespe.pdf"
-    path1 = "/Users/t316775/Downloads/Drt_Adm_Cespe.txt"
+    path = "/Users/t316775/Downloads/Direito Constitucional - CESPE.pdf"
+    path1 = "/Users/t316775/Downloads/ireito Constitucional - CESPE.txt"
     fp = open(path1, "w")
     str1 = scrap_pdf(path)
     fp.write(str1)

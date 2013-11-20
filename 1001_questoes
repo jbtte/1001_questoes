@@ -1,0 +1,16 @@
+# -*- coding: cp1252 -*-
+def questoes_1001(file_name):
+    import pdf_scraper
+    import so_questoes
+    import so_respostas
+    import certo_errado
+
+    path = '/Users/t316775/Downloads/Questões - Ponto/Quest+Áes - Ponto/CESPE/'+file_name+'.pdf'
+    txt = '/Users/t316775/Downloads/Questões - Ponto/Quest+Áes - Ponto/CESPE/'+file_name+'.txt'
+    fp = open(txt, "w")
+    str1 = scrap_pdf(path)
+    fp.write(str1)
+    
+    create_questoes(txt)
+    create_respostas(txt)
+    certo_errado(txt)
