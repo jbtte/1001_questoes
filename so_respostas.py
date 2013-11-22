@@ -15,7 +15,7 @@ def create_respostas(archive):
 
     '''
     ## given file, opening to read it
-    txt = '/Users/t316775/Downloads/Questões - Ponto/Quest+Áes - Ponto/CESPE/'+archive
+    txt = '/Users/t316775/Downloads/'+archive+".txt"
     fp = open (txt, 'r')
 
     ## creating temp file
@@ -23,7 +23,7 @@ def create_respostas(archive):
     temp = open (temp_file, 'w')
     
     ## creating file to write into
-    novo_arquivo = '/Users/t316775/Downloads/Questões - Ponto/Quest+Áes - Ponto/CESPE/'+ archive + "_respostas"
+    novo_arquivo = '/Users/t316775/Downloads/'+ archive + "_explicacoes.txt"
     final = open(novo_arquivo, "w")
 
     ## Counter for the questions and pages read
@@ -46,7 +46,8 @@ def create_respostas(archive):
                 break
          
         ## Establishing when to start copying the text
-        if ("Errado." in line) or ("Correto." in line) or ("Errada." in line) or ("Correta." in line):
+        if ("Errado." in line) or ("Correto." in line) or ("Errada." in line)\
+           or ("Correta." in line) or "Anulado." in line or "Anulada." in line:
             #temp.write("\n")
             temp.write("Resposta " + str("%03d" % questao) + " ")
             temp.write(line.replace("\n", " ").replace((str(questao)+"."), ""))
@@ -106,7 +107,8 @@ def create_respostas(archive):
     ## without unnecessary white spaces
     for line in temp:
         if (".  "+"\n") in line or (".  "+"\n") in line or (".   "+"\n") in line\
-                or (". "+"\n") in line or (".    "+"\n") in line:
+                or (". "+"\n") in line or (".    "+"\n") in line\
+                or ("."+"\n") in line:
             final.write(' '.join(line.split()))
             final.write("\n")
         else:
@@ -123,4 +125,4 @@ def create_respostas(archive):
 
 
 if __name__ == "__main__":
-    create_respostas("Drt_Adm_Cespe.txt")
+    create_respostas("Direito Constitucional - CESPE")

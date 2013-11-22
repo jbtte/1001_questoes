@@ -62,7 +62,7 @@ def create_questoes(archive):
                     break
                 ## if line has "Comentadas - Direito" it is the page header
                 ## omit such line and continue loop
-                elif "Comentadas - Direito" in line:
+                elif "1001 Ques" in line:
                     temp.write("")
                     continue
                 ## if line has "Leandro Cadenas Prado" it is the page header
@@ -93,6 +93,7 @@ def create_questoes(archive):
                 or (". "+"\n") in line or (".    "+"\n") in line:
             final.write(' '.join(line.split()))
             final.write("\n")
+        
         else:
             final.write(' '.join(line.split()))
             #final.write(line.replace("  "," "))
@@ -154,7 +155,8 @@ def create_respostas(archive):
                 break
          
         ## Establishing when to start copying the text
-        if ("Errado" in line) or ("Correto." in line) or ("Errada." in line) or ("Correta." in line):
+        if ("Errado." in line) or ("Correto." in line) or ("Errada." in line)\
+           or ("Correta." in line) or "Anulado." in line or "Anulada." in line:
             #temp.write("\n")
             questao += 1
             temp.write("Resposta " + str("%03d" % questao) + " ")
@@ -166,6 +168,12 @@ def create_respostas(archive):
                 qp.write("Resposta " + str("%03d" % questao) + " ")
                 qp.write("Errado")
                 qp.write("\n")
+
+            elif ("Anulado." in line) or ("Anulada." in line):
+                qp.write("Resposta " + str("%03d" % questao) + " ")
+                qp.write("Anulada")
+                qp.write("\n")
+
             else:
                 qp.write("Resposta " + str("%03d" % questao) + " ")
                 qp.write("Certo")
@@ -177,7 +185,7 @@ def create_respostas(archive):
                 ## if period and line break encountered, copy line and break loop
                 if (".  "+"\n") in line or (".  "+"\n") in line or (".   "+"\n") in line\
                 or (". "+"\n") in line or (".    "+"\n") in line or ("."+"\n") in line\
-                or ("."+"\n") in line:
+                or ("!"+"\n") in line:
                     temp.write(line)
                     break
 
@@ -200,7 +208,7 @@ def create_respostas(archive):
                 
                 ## if line has "Comentadas - Direito" it is the page header
                 ## omit such line and continue loop
-                elif "Comentadas - Direito" in line:
+                elif "1001 Ques" in line:
                     temp.write("")
                     continue
                 ## if line has "Leandro Cadenas Prado" it is the page header
@@ -228,7 +236,8 @@ def create_respostas(archive):
     ## without unnecessary white spaces
     for line in temp:
         if (".  "+"\n") in line or (".  "+"\n") in line or (".   "+"\n") in line\
-                or (". "+"\n") in line or (".    "+"\n") in line:
+                or (". "+"\n") in line or (".    "+"\n") in line\
+                or ("."+"\n") in line:
             final.write(' '.join(line.split()))
             final.write("\n")
         else:

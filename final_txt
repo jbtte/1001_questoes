@@ -1,0 +1,23 @@
+// path to documents
+path = "/Users/t316775/Downloads/Site/"
+
+// subject name
+materia = "teste"
+
+// opening the files
+explicacao = open(path+materia+"_explicacoes", "r")
+questoes = open(path+materia+"_questoes", "r")
+respostas = open(path+materia+"_respostas", "r")
+materias = open(path+materia+"_materias", "r")
+
+final = open(path_materia_"_final", "w")
+
+
+
+
+
+explicacao.close()
+questoes.close()
+respostas.close()
+materias.close()
+final.close()
