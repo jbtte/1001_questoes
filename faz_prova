@@ -1,0 +1,97 @@
+# -*- coding: UTF-8 -*-
+
+def faz_prova(materia, qtdd):
+
+    #importing libraries
+    import random
+    import re
+    import MySQLdb
+
+    #Connecting to DB
+    db = MySQLdb.connect(host='localhost',
+		     user='root',
+		     passwd='',
+		     db='questoes')
+
+    # Creating cursor
+    cur = db.cursor()
+
+    # Creating global variables
+    lista = []
+    respostas = {}
+    errado = []
+    questao = 1
+    
+    # creating random list of numbers in the quantity (qtdd)
+    # of questions desired
+    for each in range(qtdd):
+        num = random.randrange(1,1001)
+        if num in lista:
+            lista.append(num+1%1001)
+        else:
+            lista.append(num)
+    lista = sorted(lista)
+    
+    # Printing the question accordindly with the random list generated
+    for each_line in range(qtdd):
+        print ("Questao" + str(questao) + " - ")
+        cur.execute("SELECT pergunta FROM perguntas WHERE num_quest = " + str(lista[each_line]))
+        print str(cur.fetchone())
+        questao += 1
+        resp = raw_input("Certo - C ou Errado E: ")
+        if (resp == "c") or (resp =="C"):
+            resp = "Certo\n"
+        elif (resp == "e") or (resp == "E"):
+            resp = "Errad\n"
+        respostas[lista[each_line]] = resp
+
+    # Fetching the correct the answers
+    # Creating dictionary to store answers
+    gabarito = {}
+
+    # Fetching answers from db
+    for each_line in range(len(lista)):
+        cur.execute("SELECT resposta FROM perguntas WHERE num_quest =" + str(lista[each_line]))
+        temp_resp = cur.fetchone()
+        gabarito[lista[each_line]] = str(temp_resp)[2:7]
+        
+    
+    #Comparing answers
+    for each in lista:
+       if respostas[each].strip("\n") != gabarito[each]:
+            errado.append(each)
+    print errado
+    
+    # Final grade and checking wrong answers
+    print ("Voce errou " + str(len(errado)))
+    print ("Sua nota final e " + str(100-(len(errado)* 100) // qtdd))
+
+    correcao = raw_input("Voce quer ver as respostas erradas? sim ou nao? ")
+    
+    if (correcao == "sim"):
+        # Of the wrong answer getting the comments
+        print ("Você errou as questoes:")
+        print errado
+        # With the list of wrong answers (errado)
+        # printing the explanation for each wrong question
+        for each_line in range(len(errado)):
+            print ("\n")
+            print ("-----------------------------------------------------------------------------")
+            print ("\n")
+            print ("Questão " + str(errado[each_line]))
+            cur.execute("SELECT pergunta FROM perguntas WHERE num_quest = " + str(errado[each_line]))
+            print str(cur.fetchone())
+            print ("Resposta: ")
+            cur.execute("SELECT explicacao FROM perguntas WHERE num_quest =" + str(errado[each_line]))
+            print str(cur.fetchone())
+        print ("-----------------------------------------------------------------------------")    
+        
+    else:
+        print ("Keep up")
+    
+    
+    #Closing db connection
+    cur.close()
+    db.close()
+
+    return "Good bye"
