@@ -1,11 +1,12 @@
 # -*- coding: UTF-8 -*-
 
-def faz_prova(materia, qtdd):
+def faz_prova():
 
     #importing libraries
     import random
     import re
     import MySQLdb
+    from time import sleep
 
     #Connecting to DB
     db = MySQLdb.connect(host='localhost',
@@ -17,58 +18,163 @@ def faz_prova(materia, qtdd):
     cur = db.cursor()
 
     # Creating global variables
-    lista = []
     respostas = {}
     errado = []
+    lista_quest = []
+    dict_materia = {}
+    materia_escolhida = []
+    dict_materia_qtdd = {}
+    dict_materia_questoes = {}
     questao = 1
+    erro = 0
+   
+
+    # Ask user for input about subject and number of questions
+    ## Getting all subjects from db and placing in dictionary
+    cur.execute("SELECT DISTINCT (materia) FROM perguntas")
+    for each in range(cur.rowcount):
+        dict_materia[each]=(str(cur.fetchone())).strip("()\\'\\',")
+        
+        print ("(" + str(each) + ") - " + str(dict_materia[each])) 
+
+    ## Creating list and asking user which subjects should the test have
+    loop = 0
     
-    # creating random list of numbers in the quantity (qtdd)
-    # of questions desired
-    for each in range(qtdd):
-        num = random.randrange(1,1001)
-        if num in lista:
-            lista.append(num+1%1001)
+    while (True):
+        ## print chosen subjects thus far
+        if loop == 0:
+            choose_subject = raw_input("Prova de que materia? Escolha pelo numero ")
+            loop += 1
         else:
-            lista.append(num)
-    lista = sorted(lista)
+            print ("Voce ja escolheu: ")
+            for each in range(len(materia_escolhida)):
+                print (materia_escolhida[each])
+            choose_subject = raw_input("Mais alguma materia? Se estiver satisfeito aperte X. ")
+        
+        # terminate loop with choosen subjects
+        if choose_subject == "x":
+            break
+        ## error control - uncooperative user
+        elif erro > 5:
+            print ("Não cooperou. Hora de dizer tchau")
+            #Closing db connection
+            cur.close()
+            db.close()
+            return 1
+
+        # if input within range of subjects
+        elif ord(choose_subject) < cur.rowcount+48:
+            # if subject has already been choosen
+            if dict_materia[int(choose_subject)] in materia_escolhida:
+                print ("Essa materia v. já escolheu!")
+                erro += 1
+                
+            # if all is good, add subject to list
+            else:
+                materia_escolhida.append(dict_materia[int(choose_subject)])
+                
+       
+        # invalid input by user
+        else:
+            print ("Essa escolha é inválida! Digite somente o numero referente a materia")
+            erro += 1
+            continue
+        
+    ## How many questions from each subject chosen 
+
+    for each_subj in materia_escolhida:
+        qtdd_quest = raw_input("E quantas questoes de " + str(each_subj) + "? ")
+        dict_materia_qtdd[each_subj] = qtdd_quest
+        
+        
+    # creating random list of numbers in the quantity of questions desired for each subject
+    
+    for each_subj in materia_escolhida:
+        print (materia_escolhida)
+        lista = []
+        for each_qtdd in range(int(dict_materia_qtdd[each_subj])):
+            num = random.randrange(1,1001)
+            if num in lista:
+                lista.append(num+1%1001)
+            else:
+                lista.append(num)
+        lista = sorted(lista)
+        dict_materia_questoes[each_subj] = lista
+        
+    
+        
+    ## Starting the test
+    print "Vai comecar!"
+    print "Imprimindo as questões"
+    sleep(2)
+    print "Conferindo os gabaritos"
+    sleep(2)
+    print "Tudo pronto"
+    sleep(1)
+    print "\n" * 100
+    
+
     
     # Printing the question accordindly with the random list generated
-    for each_line in range(qtdd):
-        print ("Questao" + str(questao) + " - ")
-        cur.execute("SELECT pergunta FROM perguntas WHERE num_quest = " + str(lista[each_line]))
-        print str(cur.fetchone())
-        questao += 1
-        resp = raw_input("Certo - C ou Errado E: ")
-        if (resp == "c") or (resp =="C"):
-            resp = "Certo\n"
-        elif (resp == "e") or (resp == "E"):
-            resp = "Errad\n"
-        respostas[lista[each_line]] = resp
+    for each_subj in materia_escolhida:
+        for each_quest in range(int(dict_materia_qtdd[each_subj])):
+            print ("Questao" + str(questao) + " - ")
+            temp_1 = str(dict_materia_questoes[each_subj][each_quest])
+            cur.execute("SELECT `pergunta`, `index` FROM perguntas WHERE num_quest = " \
+                               + temp_1 + " AND materia = \""+ each_subj +"\"")
+            temp = cur.fetchone()
+            ask = str(temp[0])
+            print ask
+            questao += 1
+            resp = raw_input("Certo - C ou Errado E: ")
+            if (resp == "c") or (resp =="C"):
+                resp = "Certo\n"
+            elif (resp == "e") or (resp == "E"):
+                resp = "Errado\n"
+            respostas[temp[1]] = resp
+            lista_quest.append(int((str(temp[1])).strip("()\\'\\',")))
 
     # Fetching the correct the answers
     # Creating dictionary to store answers
     gabarito = {}
 
     # Fetching answers from db
-    for each_line in range(len(lista)):
-        cur.execute("SELECT resposta FROM perguntas WHERE num_quest =" + str(lista[each_line]))
+    for each_line in lista_quest:
+        cur.execute("SELECT resposta FROM perguntas WHERE `index` =" + str(each_line))
         temp_resp = cur.fetchone()
-        gabarito[lista[each_line]] = str(temp_resp)[2:7]
+        gabarito[each_line] = (str(temp_resp)).strip("()\\'\\',")
         
     
     #Comparing answers
-    for each in lista:
+    for each in lista_quest:
        if respostas[each].strip("\n") != gabarito[each]:
             errado.append(each)
     print errado
     
     # Final grade and checking wrong answers
+    #Little monkey business before showing answer
+    print "\n" * 20
+    print "Verificando respostas"
+    sleep(2)
+    print "Reconferindo"
+    sleep(1)
+    print "Lá vai"
+    sleep(1)
+    
     print ("Voce errou " + str(len(errado)))
-    print ("Sua nota final e " + str(100-(len(errado)* 100) // qtdd))
+    print ("Sua nota final e " + str(100-(len(errado)* 100) // len(lista_quest)))
 
     correcao = raw_input("Voce quer ver as respostas erradas? sim ou nao? ")
-    
+
+    # Showing the correct answers
     if (correcao == "sim"):
+        #Little monkey business to show answer
+        print "Procurando as correções"
+        sleep(1)
+        print "Peraí"
+        sleep(1)
+        print "La vai"
+        sleep(1)
         # Of the wrong answer getting the comments
         print ("Você errou as questoes:")
         print errado
@@ -80,12 +186,13 @@ def faz_prova(materia, qtdd):
             print ("\n")
             print ("Questão " + str(errado[each_line]))
             cur.execute("SELECT pergunta FROM perguntas WHERE num_quest = " + str(errado[each_line]))
-            print str(cur.fetchone())
+            print (str(cur.fetchone())).strip("()\\'\\',")
             print ("Resposta: ")
             cur.execute("SELECT explicacao FROM perguntas WHERE num_quest =" + str(errado[each_line]))
-            print str(cur.fetchone())
+            print (str(cur.fetchone())).strip("()\\'\\',")
         print ("-----------------------------------------------------------------------------")    
         
+    # Checking out
     else:
         print ("Keep up")
     
