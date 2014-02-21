@@ -56,7 +56,7 @@ def faz_prova():
             break
         ## error control - uncooperative user
         elif erro > 5:
-            print ("Não cooperou. Hora de dizer tchau")
+            print ("Nao cooperou. Hora de dizer tchau")
             #Closing db connection
             cur.close()
             db.close()
@@ -66,7 +66,7 @@ def faz_prova():
         elif ord(choose_subject) < cur.rowcount+48:
             # if subject has already been choosen
             if dict_materia[int(choose_subject)] in materia_escolhida:
-                print ("Essa materia v. já escolheu!")
+                print ("Essa materia v. ja escolheu!")
                 erro += 1
                 
             # if all is good, add subject to list
@@ -90,33 +90,36 @@ def faz_prova():
     # creating random list of numbers in the quantity of questions desired for each subject
     
     for each_subj in materia_escolhida:
-        print (materia_escolhida)
-        lista = []
+        temp_lista = []
         for each_qtdd in range(int(dict_materia_qtdd[each_subj])):
             num = random.randrange(1,1001)
-            if num in lista:
-                lista.append(num+1%1001)
+            if num in temp_lista:
+                temp_lista.append(num+1%1001)
             else:
-                lista.append(num)
-        lista = sorted(lista)
-        dict_materia_questoes[each_subj] = lista
+                temp_lista.append(num)
+        temp_lista = sorted(temp_lista)
+        dict_materia_questoes[each_subj] = temp_lista
         
     
         
     ## Starting the test
     print "Vai comecar!"
-    print "Imprimindo as questões"
+    print "Imprimindo as questoes"
     sleep(2)
     print "Conferindo os gabaritos"
     sleep(2)
     print "Tudo pronto"
     sleep(1)
-    print "\n" * 100
+    print "\n" * 20
     
 
     
     # Printing the question accordindly with the random list generated
     for each_subj in materia_escolhida:
+        print "\n"
+        print ("Direito " + each_subj)
+        print "----------------------------------------------------------------------------------"
+        print "\n"
         for each_quest in range(int(dict_materia_qtdd[each_subj])):
             print ("Questao" + str(questao) + " - ")
             temp_1 = str(dict_materia_questoes[each_subj][each_quest])
@@ -133,6 +136,7 @@ def faz_prova():
                 resp = "Errado\n"
             respostas[temp[1]] = resp
             lista_quest.append(int((str(temp[1])).strip("()\\'\\',")))
+            print "\n"
 
     # Fetching the correct the answers
     # Creating dictionary to store answers
@@ -149,7 +153,7 @@ def faz_prova():
     for each in lista_quest:
        if respostas[each].strip("\n") != gabarito[each]:
             errado.append(each)
-    print errado
+    
     
     # Final grade and checking wrong answers
     #Little monkey business before showing answer
@@ -158,43 +162,51 @@ def faz_prova():
     sleep(2)
     print "Reconferindo"
     sleep(1)
-    print "Lá vai"
+    print "Pronto"
     sleep(1)
+
+    nota = "Sua nota final e " + str(100-(len(errado)* 100) // len(lista_quest))
     
-    print ("Voce errou " + str(len(errado)))
-    print ("Sua nota final e " + str(100-(len(errado)* 100) // len(lista_quest)))
-
-    correcao = raw_input("Voce quer ver as respostas erradas? sim ou nao? ")
-
-    # Showing the correct answers
-    if (correcao == "sim"):
-        #Little monkey business to show answer
-        print "Procurando as correções"
-        sleep(1)
-        print "Peraí"
-        sleep(1)
-        print "La vai"
-        sleep(1)
-        # Of the wrong answer getting the comments
-        print ("Você errou as questoes:")
-        print errado
-        # With the list of wrong answers (errado)
-        # printing the explanation for each wrong question
-        for each_line in range(len(errado)):
-            print ("\n")
-            print ("-----------------------------------------------------------------------------")
-            print ("\n")
-            print ("Questão " + str(errado[each_line]))
-            cur.execute("SELECT pergunta FROM perguntas WHERE num_quest = " + str(errado[each_line]))
-            print (str(cur.fetchone())).strip("()\\'\\',")
-            print ("Resposta: ")
-            cur.execute("SELECT explicacao FROM perguntas WHERE num_quest =" + str(errado[each_line]))
-            print (str(cur.fetchone())).strip("()\\'\\',")
-        print ("-----------------------------------------------------------------------------")    
-        
-    # Checking out
+    if len(errado) == 0:
+        print ("Deixa eu olhar isso direito")
+        sleep(2)
+        print ("PARABENS!! Acertou tudo!")
+        print nota
+        print ("Good Job!")
     else:
-        print ("Keep up")
+        print ("Voce errou " + str(len(errado)))
+        print nota
+        correcao = raw_input("Voce quer ver as respostas erradas? sim ou nao? ")
+
+        # Showing the correct answers
+        if (correcao == "sim"):
+            #Little monkey business to show answer
+            print "Procurando as correcoes"
+            sleep(1)
+            print "Perai"
+            sleep(1)
+            print "La vai"
+            sleep(1)
+            # Of the wrong answer getting the comments
+            print ("Voce errou as questoes:")
+            print errado
+            # With the list of wrong answers (errado)
+            # printing the explanation for each wrong question
+            for each_line in range(len(errado)):
+                print ("\n")
+                print ("-----------------------------------------------------------------------------")
+                print ("\n")
+                print ("Questao " + str(errado[each_line]))
+                cur.execute("SELECT pergunta FROM perguntas WHERE `index` = " + str(errado[each_line]))
+                print (str(cur.fetchone()[0])).strip("()\\'\\',")
+                print ("Resposta: ")
+                cur.execute("SELECT explicacao FROM perguntas WHERE `index` =" + str(errado[each_line]))
+                print (str(cur.fetchone()[0])).strip("()\\'\\',")
+            print ("-----------------------------------------------------------------------------")    
+            
+        # Checking out
+        else:
+            print ("Keep up")
     
     
     #Closing db connection
